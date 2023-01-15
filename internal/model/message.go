@@ -17,5 +17,5 @@ type Message struct {
 type MessageRepository interface {
 	List(ctx context.Context) ([]*Message, error)
 	Get(id uuid.UUID, ctx context.Context) (*Message, error)
-	Create(entity Message, ctx context.Context) error
+	Create(entity *Message, ctx context.Context) error
 }
