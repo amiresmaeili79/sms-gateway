@@ -1,8 +1,9 @@
 package repository
 
+import "context"
+
 type Repository interface {
-	Configure(db interface{})
-	List() (interface{}, error)
-	Get(id interface{}) (interface{}, error)
-	Create(entity interface{}) (interface{}, error)
+	List(ctx context.Context) (interface{}, error)
+	Get(id interface{}, ctx context.Context) (interface{}, error)
+	Create(entity interface{}, ctx context.Context) (interface{}, error)
 }

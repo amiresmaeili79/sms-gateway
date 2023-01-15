@@ -7,7 +7,3 @@ import (
 type PostgresRepository struct {
 	db *pgx.Conn
 }
-
-func (p *PostgresRepository) Configure(db *pgx.Conn) {
-	p.db = db
-}
