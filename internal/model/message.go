@@ -5,6 +5,3 @@ type Message struct {
 	Sender    string `json:"sender,omitempty"`
 	Body      string `json:"body,omitempty"`
 }
-
-type MessageRepository interface {
-}
