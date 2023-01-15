@@ -7,6 +7,7 @@ import (
 )
 
 type Message struct {
+	Id        uuid.UUID `json:"id,omitempty"`
 	Recipient string    `json:"recipient,omitempty"`
 	Sender    string    `json:"sender,omitempty"`
 	Body      string    `json:"body,omitempty"`
