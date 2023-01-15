@@ -12,7 +12,7 @@ const UrlSample = "postgres://%s:%s@%s:%s/%s"
 
 // ConnectToDB takes configuration struct and creates a connection to the given Database
 func ConnectToDB(cfg *cfg.Config) (*pgx.Conn, error) {
-	dbUrl := fmt.Sprintf(UrlSample, cfg.DBName, cfg.DBPass, cfg.DBHost, cfg.DBPort, cfg.DBName)
+	dbUrl := fmt.Sprintf(UrlSample, cfg.DBUser, cfg.DBPass, cfg.DBHost, cfg.DBPort, cfg.DBName)
 	conn, err := pgx.Connect(context.Background(), dbUrl)
 	if err != nil {
 		return nil, err
