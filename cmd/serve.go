@@ -3,6 +3,9 @@ package cmd
 import (
 	"fmt"
 	"github.com/amir79esmaeili/sms-gateway/internal/middleware"
+	"github.com/amir79esmaeili/sms-gateway/internal/postgres"
+	"github.com/amir79esmaeili/sms-gateway/internal/repository"
+	"github.com/amir79esmaeili/sms-gateway/internal/service"
 	"github.com/spf13/cobra"
 	"log"
 	"net/http"
@@ -25,14 +28,20 @@ func addServeCmd(root *cobra.Command) {
 func serve(cmd *cobra.Command) {
 	config := loadConfig(cmd)
 
+	db, err := postgres.ConnectToDB(&config)
+	if err != nil {
+		log.Fatalf("Could not connect to db, %v", err)
+	}
+
+	msgRepo := repository.NewMessageRepository(db)
+	msgServices := service.NewServices(msgRepo)
+
 	mux := http.NewServeMux()
 
-	mux.Handle("/ping", middleware.LogCurrentRequest(
-		http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-			writer.Write([]byte("Hello World!"))
-		})))
+	mux.Handle("/messages", middleware.LogCurrentRequest(
+		http.HandlerFunc(msgServices.GetMessages)))
 
-	err := http.ListenAndServe(fmt.Sprintf(":%v", config.AppPort), mux)
+	err = http.ListenAndServe(fmt.Sprintf(":%v", config.AppPort), mux)
 	if err != nil {
 		log.Fatalf("Could not start listening on the given port, %v", err)
 	}
