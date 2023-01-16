@@ -12,4 +12,5 @@ type Config struct {
 	RabbitHost       string `env:"RMQ_HOST,required"`
 	RabbitPort       string `env:"RMQ_PORT,required"`
 	KavehNegarAPIKey string `env:"KAVEH_NEGAR_API_KEY,required"`
+	KavehNegarURL    string `env:"KAVEH_NEGAR_URL,required"`
 }
