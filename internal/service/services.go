@@ -7,7 +7,7 @@ import (
 )
 
 type MessageBroker interface {
-	Send(message *model.Message) error
+	Send(message *model.NewMessageRequest) error
 }
 
 type Services struct {
@@ -41,5 +41,17 @@ func (s Services) GetMessages(w http.ResponseWriter, r *http.Request) {
 func (s Services) SendNewMessage(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+	}
+
+	decoder := json.NewDecoder(r.Body)
+	var newMsgRequest model.NewMessageRequest
+	err := decoder.Decode(&newMsgRequest)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+	}
+
+	err = s.messageBroker.Send(&newMsgRequest)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 	}
 }

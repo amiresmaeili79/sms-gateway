@@ -46,6 +46,9 @@ func serve(cmd *cobra.Command) {
 	mux.Handle("/messages", middleware.LogCurrentRequest(
 		http.HandlerFunc(msgServices.GetMessages)))
 
+	mux.Handle("/new-message", middleware.LogCurrentRequest(
+		http.HandlerFunc(msgServices.SendNewMessage)))
+
 	err = http.ListenAndServe(fmt.Sprintf(":%v", config.AppPort), mux)
 	if err != nil {
 		log.Fatalf("Could not start listening on the given port, %v", err)
