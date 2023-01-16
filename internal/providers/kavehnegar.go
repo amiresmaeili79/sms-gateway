@@ -15,7 +15,7 @@ type KavehNegar struct {
 
 func NewKavehNegarClient(config *cfg.Config) *KavehNegar {
 	return &KavehNegar{
-		apiKey: config.KaveNegarAPIKey,
+		apiKey: config.KavehNegarAPIKey,
 		name:   KavehNegarStr,
 	}
 }
