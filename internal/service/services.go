@@ -6,13 +6,19 @@ import (
 	"net/http"
 )
 
-type Services struct {
-	repository model.MessageRepository
+type MessageBroker interface {
+	Send(message *model.Message) error
 }
 
-func NewServices(repo model.MessageRepository) *Services {
+type Services struct {
+	repository    model.MessageRepository
+	messageBroker MessageBroker
+}
+
+func NewServices(repo model.MessageRepository, broker MessageBroker) *Services {
 	return &Services{
-		repository: repo,
+		repository:    repo,
+		messageBroker: broker,
 	}
 }
 
@@ -29,5 +35,11 @@ func (s Services) GetMessages(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(messages)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+	}
+}
+
+func (s Services) SendNewMessage(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 	}
 }

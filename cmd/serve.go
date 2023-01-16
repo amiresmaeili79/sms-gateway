@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/amir79esmaeili/sms-gateway/internal/middleware"
 	"github.com/amir79esmaeili/sms-gateway/internal/postgres"
+	"github.com/amir79esmaeili/sms-gateway/internal/rabbitmq"
 	"github.com/amir79esmaeili/sms-gateway/internal/repository"
 	"github.com/amir79esmaeili/sms-gateway/internal/service"
 	"github.com/spf13/cobra"
@@ -32,9 +33,13 @@ func serve(cmd *cobra.Command) {
 	if err != nil {
 		log.Fatalf("Could not connect to db, %v", err)
 	}
+	rabbit, err := rabbitmq.NewRabbitMQClient(&config)
+	if err != nil {
+		log.Fatalf("Could not connect to db, %v", err)
+	}
 
 	msgRepo := repository.NewMessageRepository(db)
-	msgServices := service.NewServices(msgRepo)
+	msgServices := service.NewServices(msgRepo, rabbit)
 
 	mux := http.NewServeMux()
 
