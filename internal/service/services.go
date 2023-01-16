@@ -3,6 +3,7 @@ package service
 import (
 	"encoding/json"
 	"github.com/amir79esmaeili/sms-gateway/internal/model"
+	"github.com/amir79esmaeili/sms-gateway/internal/providers"
 	"net/http"
 )
 
@@ -54,4 +55,13 @@ func (s Services) SendNewMessage(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 	}
+}
+
+func (s Services) GetProviders(w http.ResponseWriter, r *http.Request) {
+	err := json.NewEncoder(w).Encode(providers.AvailableProviders)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+	}
+
+	return
 }
