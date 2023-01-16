@@ -52,7 +52,7 @@ func NewRabbitMQClient(config *cfg.Config) (*RabbitMQ, error) {
 	}, nil
 }
 
-func (r RabbitMQ) Send(message *model.Message) error {
+func (r RabbitMQ) Send(message *model.NewMessageRequest) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 

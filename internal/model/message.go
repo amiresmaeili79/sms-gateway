@@ -20,3 +20,9 @@ type MessageRepository interface {
 	Get(id uuid.UUID, ctx context.Context) (*Message, error)
 	Create(entity *Message, ctx context.Context) error
 }
+
+type NewMessageRequest struct {
+	Recipient string `json:"recipient,omitempty"`
+	Body      string `json:"body,omitempty"`
+	Provider  string `json:"provider,omitempty"`
+}
