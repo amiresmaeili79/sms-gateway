@@ -1,10 +1,13 @@
 package service
 
 import (
+	"context"
 	"encoding/json"
 	"github.com/amir79esmaeili/sms-gateway/internal/model"
 	"github.com/amir79esmaeili/sms-gateway/internal/providers"
+	"log"
 	"net/http"
+	"time"
 )
 
 type MessageBroker interface {
@@ -69,4 +72,39 @@ func (s Services) GetProviders(w http.ResponseWriter, r *http.Request) {
 	}
 
 	return
+}
+
+func (s Services) HandleSendingNewMessages() {
+
+	incoming, err := s.messageBroker.Receive()
+
+	if err != nil {
+		log.Fatalf("could not commuincate with rabbit mq to receive messages, %v\n", err)
+	}
+
+	for m := range incoming {
+
+		provider := s.providerRegistry.GetProvider(m.Provider)
+
+		newMessage := model.Message{
+			Recipient: m.Recipient,
+			Sender:    provider.SelectSender(),
+			Provider:  provider.Name(),
+			Body:      m.Body,
+			Date:      time.Now(),
+		}
+
+		go func() {
+			err := provider.SendSMS(&newMessage)
+			if err != nil {
+				log.Printf("could not send message, %v\n", err)
+			}
+		}()
+		go func() {
+			err = s.repository.Create(&newMessage, context.Background())
+			if err != nil {
+				log.Printf("could not save message to db, %v\n", err)
+			}
+		}()
+	}
 }
