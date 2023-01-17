@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"github.com/amir79esmaeili/sms-gateway/internal/model"
 	"github.com/amir79esmaeili/sms-gateway/internal/providers"
+	"github.com/google/uuid"
 	"log"
 	"net/http"
 	"time"
@@ -86,7 +87,9 @@ func (s Services) HandleSendingNewMessages() {
 
 		provider := s.providerRegistry.GetProvider(m.Provider)
 
+		id, _ := uuid.NewUUID()
 		newMessage := model.Message{
+			Id:        id,
 			Recipient: m.Recipient,
 			Sender:    provider.SelectSender(),
 			Provider:  provider.Name(),

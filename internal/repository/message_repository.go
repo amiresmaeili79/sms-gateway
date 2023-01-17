@@ -19,6 +19,9 @@ const (
     	date date not null,
     	provider varchar(20)
     );`
+	InsertMessage = `INSERT INTO messages (
+    id, sender, recipient, body, date, provider
+	) VALUES($1, $2, $3, $4, $5, $6);`
 )
 
 type MessageRepositoryImpl struct {
@@ -69,5 +72,10 @@ func (m MessageRepositoryImpl) Get(id uuid.UUID, ctx context.Context) (*model.Me
 }
 
 func (m MessageRepositoryImpl) Create(entity *model.Message, ctx context.Context) error {
+	_, err := m.db.Exec(ctx, InsertMessage, entity.Id, entity.Sender,
+		entity.Recipient, entity.Body, entity.Date, entity.Provider)
+	if err != nil {
+		return err
+	}
 	return nil
 }
