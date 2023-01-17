@@ -9,17 +9,22 @@ import (
 
 type MessageBroker interface {
 	Send(message *model.NewMessageRequest) error
+	Receive() (chan *model.NewMessageRequest, error)
+	Close() error
 }
 
 type Services struct {
-	repository    model.MessageRepository
-	messageBroker MessageBroker
+	repository       model.MessageRepository
+	messageBroker    MessageBroker
+	providerRegistry *providers.ProviderRegistry
 }
 
-func NewServices(repo model.MessageRepository, broker MessageBroker) *Services {
+func NewServices(repo model.MessageRepository,
+	broker MessageBroker, providerRegistry *providers.ProviderRegistry) *Services {
 	return &Services{
-		repository:    repo,
-		messageBroker: broker,
+		repository:       repo,
+		messageBroker:    broker,
+		providerRegistry: providerRegistry,
 	}
 }
 

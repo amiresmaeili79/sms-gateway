@@ -30,6 +30,8 @@ func serve(cmd *cobra.Command) {
 	config := loadConfig(cmd)
 
 	db, err := postgres.ConnectToDB(&config)
+	defer postgres.KillConnection(db)
+
 	if err != nil {
 		log.Fatalf("Could not connect to db, %v", err)
 	}
@@ -37,9 +39,10 @@ func serve(cmd *cobra.Command) {
 	if err != nil {
 		log.Fatalf("Could not connect to db, %v", err)
 	}
+	defer rabbit.Close()
 
 	msgRepo := repository.NewMessageRepository(db)
-	msgServices := service.NewServices(msgRepo, rabbit)
+	msgServices := service.NewServices(msgRepo, rabbit, nil)
 
 	mux := http.NewServeMux()
 
