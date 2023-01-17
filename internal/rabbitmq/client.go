@@ -7,6 +7,7 @@ import (
 	"github.com/amir79esmaeili/sms-gateway/internal/cfg"
 	"github.com/amir79esmaeili/sms-gateway/internal/model"
 	amqp "github.com/rabbitmq/amqp091-go"
+	"log"
 	"time"
 )
 
@@ -70,6 +71,49 @@ func (r RabbitMQ) Send(message *model.NewMessageRequest) error {
 			Body:        body,
 		})
 
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r RabbitMQ) Receive() (chan *model.NewMessageRequest, error) {
+	messages, err := r.ch.Consume(
+		r.q.Name, // queue
+		"",       // consumer
+		true,     // auto-ack
+		false,    // exclusive
+		false,    // no-local
+		false,    // no-wait
+		nil,      // args
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var incomingMessages chan *model.NewMessageRequest
+
+	go func() {
+		for d := range messages {
+			var newMsg *model.NewMessageRequest
+			err := json.Unmarshal(d.Body, &newMsg)
+			if err != nil {
+				log.Println("[Warning] a message failed to unmarshal")
+			}
+			incomingMessages <- newMsg
+		}
+	}()
+
+	return incomingMessages, nil
+}
+
+func (r RabbitMQ) Close() error {
+	err := r.ch.Close()
+	if err != nil {
+		return err
+	}
+	err = r.conn.Close()
 	if err != nil {
 		return err
 	}
