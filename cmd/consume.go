@@ -5,6 +5,7 @@ import (
 	"github.com/amir79esmaeili/sms-gateway/internal/providers"
 	"github.com/amir79esmaeili/sms-gateway/internal/rabbitmq"
 	"github.com/amir79esmaeili/sms-gateway/internal/repository"
+	"github.com/amir79esmaeili/sms-gateway/internal/service"
 	"github.com/spf13/cobra"
 	"log"
 )
@@ -37,9 +38,11 @@ func consume(cmd *cobra.Command) {
 
 	msgRepo := repository.NewMessageRepository(db)
 
+	kNegar := providers.NewKavehNegarClient(&config)
 	providerRegistry := providers.NewProviderRegistry(
-		providers.NewKavehNegarClient(&config),
+		kNegar,
 	)
 
-	//msgServices := service.NewServices(msgRepo, rabbit, providerRegistry)
+	msgServices := service.NewServices(msgRepo, rabbit, providerRegistry)
+	msgServices.HandleSendingNewMessages()
 }

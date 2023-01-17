@@ -16,44 +16,73 @@ const (
 )
 
 type RabbitMQ struct {
-	conn *amqp.Connection
-	ch   *amqp.Channel
-	q    amqp.Queue
+	connectionUrl string
+	topic         string
+	conn          *amqp.Connection
+	ch            *amqp.Channel
+	q             *amqp.Queue
 }
 
 func NewRabbitMQClient(config *cfg.Config) (*RabbitMQ, error) {
-	conn, err := amqp.Dial(fmt.Sprintf(ConfigURL,
-		config.RabbitUser, config.RabbitPass, config.RabbitHost, config.RabbitPort))
-	if err != nil {
-		return nil, err
-	}
-	ch, err := conn.Channel()
+	url := fmt.Sprintf(ConfigURL,
+		config.RabbitUser, config.RabbitPass, config.RabbitHost, config.RabbitPort)
 
+	client := &RabbitMQ{
+		connectionUrl: url,
+		topic:         config.RabbitTopic,
+		conn:          nil,
+		ch:            nil,
+		q:             nil,
+	}
+
+	err := client.Connect()
 	if err != nil {
 		return nil, err
 	}
+
+	return client, err
+
+}
+
+func (r *RabbitMQ) Connect() error {
+	conn, err := amqp.Dial(r.connectionUrl)
+	if err != nil {
+		return err
+	}
+	r.conn = conn
+
+	ch, err := conn.Channel()
+	if err != nil {
+		return err
+	}
+	r.ch = ch
 
 	q, err := ch.QueueDeclare(
-		"hello", // name
+		r.topic, // name
 		false,   // durable
 		false,   // delete when unused
 		false,   // exclusive
 		false,   // no-wait
 		nil,     // arguments
 	)
-
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return &RabbitMQ{
-		conn: conn,
-		ch:   ch,
-		q:    q,
-	}, nil
+	r.q = &q
+
+	log.Println("[INFO] RabbitMQ connected")
+	return nil
 }
 
-func (r RabbitMQ) Send(message *model.NewMessageRequest) error {
+func (r *RabbitMQ) Send(message *model.NewMessageRequest) error {
+
+	if r.conn.IsClosed() {
+		err := r.Connect()
+		if err != nil {
+			return err
+		}
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -77,7 +106,15 @@ func (r RabbitMQ) Send(message *model.NewMessageRequest) error {
 	return nil
 }
 
-func (r RabbitMQ) Receive() (chan *model.NewMessageRequest, error) {
+func (r *RabbitMQ) Receive() (chan *model.NewMessageRequest, error) {
+
+	if r.conn.IsClosed() {
+		err := r.Connect()
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	messages, err := r.ch.Consume(
 		r.q.Name, // queue
 		"",       // consumer
@@ -92,23 +129,28 @@ func (r RabbitMQ) Receive() (chan *model.NewMessageRequest, error) {
 		return nil, err
 	}
 
-	var incomingMessages chan *model.NewMessageRequest
-
+	incoming := make(chan *model.NewMessageRequest)
 	go func() {
 		for d := range messages {
+			if r.conn.IsClosed() {
+				err := r.Connect()
+				if err != nil {
+					return
+				}
+			}
 			var newMsg *model.NewMessageRequest
 			err := json.Unmarshal(d.Body, &newMsg)
 			if err != nil {
 				log.Println("[Warning] a message failed to unmarshal")
 			}
-			incomingMessages <- newMsg
+			incoming <- newMsg
 		}
 	}()
 
-	return incomingMessages, nil
+	return incoming, err
 }
 
-func (r RabbitMQ) Close() error {
+func (r *RabbitMQ) Close() error {
 	err := r.ch.Close()
 	if err != nil {
 		return err
