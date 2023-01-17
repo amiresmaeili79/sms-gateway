@@ -2,14 +2,15 @@ package cmd
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+
 	"github.com/amir79esmaeili/sms-gateway/internal/middleware"
 	"github.com/amir79esmaeili/sms-gateway/internal/postgres"
 	"github.com/amir79esmaeili/sms-gateway/internal/rabbitmq"
 	"github.com/amir79esmaeili/sms-gateway/internal/repository"
 	"github.com/amir79esmaeili/sms-gateway/internal/service"
 	"github.com/spf13/cobra"
-	"log"
-	"net/http"
 )
 
 func addServeCmd(root *cobra.Command) {

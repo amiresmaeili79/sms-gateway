@@ -1,13 +1,14 @@
 package cmd
 
 import (
+	"log"
+
 	"github.com/amir79esmaeili/sms-gateway/internal/postgres"
 	"github.com/amir79esmaeili/sms-gateway/internal/providers"
 	"github.com/amir79esmaeili/sms-gateway/internal/rabbitmq"
 	"github.com/amir79esmaeili/sms-gateway/internal/repository"
 	"github.com/amir79esmaeili/sms-gateway/internal/service"
 	"github.com/spf13/cobra"
-	"log"
 )
 
 func addConsumeCmd(root *cobra.Command) {
