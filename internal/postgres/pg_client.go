@@ -3,9 +3,10 @@ package postgres
 import (
 	"context"
 	"fmt"
+	"log"
+
 	"github.com/amir79esmaeili/sms-gateway/internal/cfg"
 	"github.com/jackc/pgx/v5"
-	"log"
 )
 
 const UrlSample = "postgres://%s:%s@%s:%s/%s"
