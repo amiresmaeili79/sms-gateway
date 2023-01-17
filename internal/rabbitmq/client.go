@@ -4,11 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
+	"time"
+
 	"github.com/amir79esmaeili/sms-gateway/internal/cfg"
 	"github.com/amir79esmaeili/sms-gateway/internal/model"
 	amqp "github.com/rabbitmq/amqp091-go"
-	"log"
-	"time"
 )
 
 const (
