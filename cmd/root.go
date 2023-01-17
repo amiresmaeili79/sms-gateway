@@ -9,5 +9,6 @@ func New() *cobra.Command {
 		Run:   nil,
 	}
 	addServeCmd(root)
+	addConsumeCmd(root)
 	return root
 }
