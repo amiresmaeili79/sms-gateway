@@ -1,9 +1,10 @@
 package cfg
 
 import (
+	"log"
+
 	"github.com/caarlos0/env/v6"
 	"github.com/joho/godotenv"
-	"log"
 )
 
 // ParseConfig loads configs from .env file
