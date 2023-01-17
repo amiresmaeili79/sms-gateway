@@ -2,10 +2,11 @@ package repository
 
 import (
 	"context"
+	"log"
+
 	"github.com/amir79esmaeili/sms-gateway/internal/model"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"log"
 )
 
 const (
