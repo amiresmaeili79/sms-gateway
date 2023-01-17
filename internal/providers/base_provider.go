@@ -13,4 +13,8 @@ var AvailableProviders = []model.Providers{
 		Name:        KavehNegarStr,
 		PersianName: KavehNegarStrFarsi,
 	},
+	{
+		Name:        GhasedakStr,
+		PersianName: GhasedakStrFarsi,
+	},
 }

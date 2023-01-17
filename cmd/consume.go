@@ -39,9 +39,9 @@ func consume(cmd *cobra.Command) {
 
 	msgRepo := repository.NewMessageRepository(db)
 
-	kNegar := providers.NewKavehNegarClient(&config)
 	providerRegistry := providers.NewProviderRegistry(
-		kNegar,
+		providers.NewKavehNegarClient(&config),
+		providers.NewGhasedakProvider(&config),
 	)
 
 	msgServices := service.NewServices(msgRepo, rabbit, providerRegistry)
