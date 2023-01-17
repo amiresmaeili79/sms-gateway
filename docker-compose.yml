@@ -1,0 +1,52 @@
+version: "3.9"
+
+services:
+  server:
+    image: sms_gateway:latest
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - rabbit
+
+  consumer:
+    image: sms_gateway:latest
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - rabbit
+
+  nginx:
+    build: ./nginx
+    ports:
+      - "80:80"
+    volumes:
+      - static_v:/static/
+    depends_on:
+      - server
+
+  rabbit:
+    image: management-alpine
+    ports:
+      - "5672:5672"
+      - "8080:15672"
+    env_file:
+      - .rabbitmq.env
+
+  db:
+    image: postgres:13
+    env_file:
+      - .postgres.env
+    environment:
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+volumes:
+  pg_data:
+  static_v:
